@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Centos 系统监控面板</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .box-card{
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app">
+    <div style="margin:2px;">
+        <el-card class="box-card">
+            <i v-if="status" style="color:#5cb87a;" class="el-icon-caret-right"></i>
+            <i v-if="!status" style="color:#F56C6C;" class="el-icon-link"></i>
+            <span>Centos 系统监控面板</span>
+        </el-card>
+        <el-card class="box-card">
+            <div style="display: flex;justify-content: space-around;">
+                <div style="text-align: center;">
+                    <div style="color:#999;margin-bottom:2px;">CPU使用率(%)</div>
+                    <el-progress type="dashboard" :percentage="cpu" :color="colors"></el-progress>
+                    <div style="color:#999;">{{ cpu_cores }} 核心</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="color:#999;margin-bottom:2px;">内存(MB)</div>
+                    <el-progress type="dashboard" :percentage="memory" :color="colors"></el-progress>
+                    <div style="color:#999;">{{ memory_use }} / {{ memory_total }}</div>
+                </div>
+            </div>
+            <div>
+                <div style="color:#999;margin:10px 0;">CPU温度({{ cpu_temperature }} °C)</div>
+                <el-progress :percentage="cpu_temperature" :color="colors" :show-text="false"></el-progress>
+                <div style="color:#999;margin:10px 0;">系统负载({{ system_load }}%)</div>
+                <el-progress :percentage="system_load" :color="colors" :show-text="false"></el-progress>
+                <div style="color:#999;margin:10px 0;">硬盘({{ disk }}%)</div>
+                <el-progress :percentage="disk" :color="colors" :show-text="false"></el-progress>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <el-popconfirm
+                    title="确定要关机吗？"
+                    icon="el-icon-info"
+                    icon-color="red"
+                    @confirm="shutdown"
+            >
+                <el-button type="danger" icon="el-icon-switch-button" circle slot="reference"></el-button>
+            </el-popconfirm>
+
+            <el-popconfirm
+                    title="确定要重启吗？"
+                    icon="el-icon-info"
+                    icon-color="red"
+                    @confirm="reboot"
+            >
+                <el-button type="primary" icon="el-icon-refresh" circle slot="reference"></el-button>
+            </el-popconfirm>
+        </el-card>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>系统信息</span>
+            </div>
+            <div class="text item">
+                <el-descriptions :column="1" border>
+                    <el-descriptions-item label="系统版本">{{ system_version }}</el-descriptions-item>
+                    <el-descriptions-item label="系统时间">{{ system_time }}</el-descriptions-item>
+                    <el-descriptions-item label="开机时长">{{ system_days }}</el-descriptions-item>
+                    <el-descriptions-item label="系统负载">{{ system_load }}%</el-descriptions-item>
+                </el-descriptions>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>CPU信息</span>
+            </div>
+            <div class="text item">
+                <el-descriptions :column="1" border>
+                    <el-descriptions-item label="CPU型号">{{ cpu_name }}</el-descriptions-item>
+                    <el-descriptions-item label="CPU核心数">{{ cpu_cores }}</el-descriptions-item>
+                    <el-descriptions-item label="CPU线程数">{{ cpu_processor }}</el-descriptions-item>
+                    <el-descriptions-item label="CPU最小频率">{{ cpu_min }} Ghz</el-descriptions-item>
+                    <el-descriptions-item label="CPU最大频率">{{ cpu_max }} Ghz</el-descriptions-item>
+                    <el-descriptions-item label="CPU温度">{{ cpu_temperature }} °C</el-descriptions-item>
+                    <el-descriptions-item v-for="item,index in cpu_mhz" :key="index" :label="'CPU'+index">
+                        <el-progress :percentage="item" :color="colors"></el-progress>
+                    </el-descriptions-item>
+                </el-descriptions>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>内存信息</span>
+            </div>
+            <div class="text item">
+                <el-descriptions :column="1" border>
+                    <el-descriptions-item label="总量">{{ memory_total }} MB</el-descriptions-item>
+                    <el-descriptions-item label="已使用">{{ memory_use }} MB</el-descriptions-item>
+                    <el-descriptions-item label="剩余">{{ memory_total-memory_use }} MB</el-descriptions-item>
+                    <el-descriptions-item label="最大支持内存">{{ memory_max_capacity }}</el-descriptions-item>
+                    <el-descriptions-item label="已安装内存">{{ memory_devices_number }}条/{{ Math.round(memory_total/1000) }}GB</el-descriptions-item>
+                    <el-descriptions-item v-for="item,index in memory_devices" :key="index" :label="'内存块'+(index+1)">{{ item.memory_capacity }} {{ item.memory_code }} {{ item.memory_mhz }}</el-descriptions-item>
+                </el-descriptions>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>硬盘信息</span>
+            </div>
+            <div class="text item">
+                <el-descriptions :column="1" border>
+                    <el-descriptions-item label="容量">{{ disk_total }} GB</el-descriptions-item>
+                    <el-descriptions-item label="已用">{{ disk_use }} GB</el-descriptions-item>
+                    <el-descriptions-item label="剩余">{{ disk_free }} GB</el-descriptions-item>
+                </el-descriptions>
+                <div>
+                    <div style="margin-top: 20px" v-for="item,index in disk_part" :key="index">
+                        <div style="display: flex;justify-content: space-between;color:#999;margin-bottom:5px;">
+                            <div style="">{{ item.disk_path }}</div>
+                            <div style="color:#999;margin-top:10px;">{{ Math.round(item.disk_total/1024/1024).toFixed(2) }} GB</div>
+                        </div>
+                        <el-progress :text-inside="true" :stroke-width="20" :percentage="parseInt(Math.round(item.disk_use / item.disk_total*100))" :color="colors"></el-progress>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>网络信息</span>
+            </div>
+            <div class="text item">
+                <el-descriptions :column="1" border>
+                    <el-descriptions-item label="外网IP">{{ net_ip }}</el-descriptions-item>
+                    <el-descriptions-item label="地址">{{ net_address }}</el-descriptions-item>
+                    <el-descriptions-item label="运营商">{{ net_operator }}</el-descriptions-item>
+                    <el-descriptions-item label="内网IP">{{ net_localhost }}</el-descriptions-item>
+                    <el-descriptions-item label="发送流量">{{ net_send }}</el-descriptions-item>
+                    <el-descriptions-item label="接受流量">{{ net_recv }}</el-descriptions-item>
+                    <el-descriptions-item label="上传">{{ net_send_speed }}/s</el-descriptions-item>
+                    <el-descriptions-item label="下载">{{ net_recv_speed }}/s</el-descriptions-item>
+                </el-descriptions>
+            </div>
+        </el-card>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.10"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+
+    var vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                ws:null,
+
+                system_version: "",
+                system_days: "",
+                system_time: "",
+                system_load: 0,
+
+                cpu: 0,
+                cpu_name: '',
+                cpu_min: 0,
+                cpu_max: 0,
+                cpu_cores: 0,
+                cpu_processor: 0,
+                cpu_temperature: 0,
+                cpu_mhz: [],
+
+                memory: 0,
+                memory_total: "",
+                memory_use: "",
+                memory_capacity: 0,
+                memory_max_capacity: '',
+                memory_devices_number: 0,
+                memory_devices: [],
+
+                disk: 0,
+                disk_total: 0,
+                disk_free: 0,
+                disk_use: 0,
+                disk_part: [],
+
+                net_ip: '',
+                net_address: '',
+                net_operator: '',
+                net_localhost: '',
+                net_recv: 0,
+                net_send: 0,
+                net_recv_speed: 0,
+                net_send_speed: 0,
+
+                colors: [
+                    {color: '#f56c6c', percentage: 100},
+                    {color: '#e6a23c', percentage: 80},
+                    {color: '#5cb87a', percentage: 60}
+                ],
+                status:false // 状态 离线/在线
+            }
+        },
+        mounted(){
+            this.connect()
+        },
+        methods:{
+            connect(){
+                if (!this.status){
+                    this.result = '连接中...'
+                    this.ws = new WebSocket("ws://"+window.location.host+"/ws/dashboard");
+                    this.ws.onopen = this.onopen
+                    this.ws.onmessage = this.onmessage
+                    this.ws.onclose = this.onclose
+                    this.ws.onerror = this.onerror
+                }
+            },
+            onopen(){
+                this.result = '在线'
+                this.type = 'success'
+                this.status = true
+            },
+            onmessage(e){
+                let res = JSON.parse(e.data)
+
+                if(res.action === 'Ping'){ return; }
+
+                if (res.action === 'notice') {
+                    if (res.code === 200) {
+                        this.$message({
+                            message: res.msg,
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error(res.msg);
+                    }
+                    return
+                }
+
+                this.system_version = res.system_version
+                this.system_days = res.system_days
+                this.system_load = parseInt(res.system_load_one*10)
+                this.system_time = res.system_time
+
+                this.memory_total = res.memory_total
+                this.memory_use = res.memory_use
+                this.memory = parseInt(res.memory_use / res.memory_total*100)
+                this.memory_max_capacity = res.memory_max_capacity
+                this.memory_devices_number = res.memory_devices_number
+                this.memory_devices = res.memory_devices
+
+                this.disk = parseInt(Math.round(res.disk_use / res.disk_total*100))
+                this.disk_total = Math.round(res.disk_total/1024/1024).toFixed(2)
+                this.disk_use = Math.round(res.disk_use/1024/1024).toFixed(2)
+                this.disk_free = Math.round(res.disk_free/1024/1024).toFixed(2)
+                this.disk_part = res.disk_part
+
+                this.cpu_name = res.cpu_name
+                this.cpu_processor = res.cpu_processor
+                this.cpu_min = (res.cpu_min_mhz/1000).toFixed(1)
+                this.cpu_max = (res.cpu_max_mhz/1000).toFixed(1)
+                this.cpu_mhz = res.cpu_mhz
+                this.cpu_temperature = parseInt(res.cpu_temperature)
+                this.cpu_cores = res.cpu_cores
+                let cpu_mhz_sum = 0.0
+                let cpu_mhz = []
+                for (index in res.cpu_mhz) {
+                    let mhz = (res.cpu_mhz[index]-res.cpu_min_mhz)/(res.cpu_max_mhz-res.cpu_min_mhz)*100
+                    cpu_mhz.push(Math.round(mhz))
+                    cpu_mhz_sum += mhz
+                }
+                this.cpu_mhz = cpu_mhz
+                this.cpu = Math.round(cpu_mhz_sum/res.cpu_cores)
+
+                this.net_ip = res.ip
+                this.net_address = res.address
+                this.net_operator = res.operator
+                this.net_localhost = res.localhost
+                this.net_recv = res.recv
+                this.net_send = res.send
+                this.net_recv_speed = res.recv_speed
+                this.net_send_speed = res.send_speed
+            },
+            onclose(){
+                this.status = false
+            },
+            onerror(){
+                this.status = false
+            },
+            send(cmd){
+                this.ws.send(`{"action":"${cmd}"}`)
+            },
+            temperatureFormat(num){
+                return num + '°C'
+            },
+            shutdown(){
+                this.send('shutdown')
+                this.$message({
+                    message: '关机指令已送达',
+                    type: 'success'
+                });
+            },
+            reboot(){
+                this.send('reboot')
+                this.$message({
+                    message: '重启指令已送达',
+                    type: 'success'
+                });
+            },
+        }
+    })
+
+</script>
+</body>
+</html>
