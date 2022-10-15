@@ -9,17 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Dashboard struct {
-}
+type Dashboard struct{}
 
 // WebSocket 服务
 var WebSocket *server.WebSocket
 
 var _ server.WebSocketInterface = (*Dashboard)(nil)
 
+func init() {
+	WebSocket = server.New("ws_"+utils.GetRandString(5)+fmt.Sprintf("%v", utils.Rand(1000, 9999)), 32)
+}
+
 func Handle(ctx *gin.Context) {
 	ctx.Set("_id", fmt.Sprintf("%v", utils.Rand(1000, 9999)))
-	WebSocket = server.New("ws_"+utils.GetRandString(5)+fmt.Sprintf("%v", utils.Rand(1000, 9999)), 32)
 	client, e := WebSocket.Bind(ctx, new(Dashboard))
 	if e != nil {
 		fmt.Println("[ws]", e)
