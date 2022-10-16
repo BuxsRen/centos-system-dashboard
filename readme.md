@@ -34,6 +34,8 @@ go build -o dashboard main.go
 nohup ./dashboard &
 ```
 
+http://127.0.0.1:8888/static 
+
 ### 常见问题
 
 - 流量无法统计
@@ -50,5 +52,7 @@ yum install dmidecode
 
 - CPU温度无法识别到
 ```shell
-# 这个自己想想办法吧，反正我这里能用就行，嘿嘿
+# 安装 lm_sensors
+yum install -y lm_sensors
+sensors-detect # 一路 YES
 ```

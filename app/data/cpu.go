@@ -100,17 +100,16 @@ func (c *Cpu) getCpuMaxMhz() {
 
 // GetCpuName 获取Cpu温度
 func (c *Cpu) getCpuTemperature() {
-	str, err := utils.Command("cat /sys/class/hwmon/hwmon1/temp1_input")
+	str, err := utils.Command("sensors")
 	if err != nil {
 		return
 	}
 
-	str = strings.Replace(str, "\n", "", -1)
+	re, _ := regexp.Compile(`(?s:Package id 0:.*?\+(.*?).[\d]+°C)`)
+	text := re.FindAllStringSubmatch(str, -1)
 
-	num, err := strconv.Atoi(str)
-	if err != nil {
-		return
+	if len(text) > 0 {
+		c.CpuTemperature = text[0][1]
 	}
 
-	c.CpuTemperature = strconv.Itoa(num / 1000)
 }
