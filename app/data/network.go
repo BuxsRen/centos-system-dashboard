@@ -41,16 +41,12 @@ func (ip *NetworkIp) GetNetworkIp() NetworkIp {
 		ipAddress = regexpStr(ipAddress, `\d+.\d+.\d+.\d+`)
 	}
 
-	var address string
-	str := regexp.MustCompile(`地址	: (.*?)\n`).FindAllStringSubmatch(res.(string), 1)
-	if len(str) > 0 {
-		address = str[0][1]
-	}
-
-	var operator string
-	str = regexp.MustCompile(`运营商	: (.*?)\n`).FindAllStringSubmatch(res.(string), 1)
-	if len(str) > 0 {
-		operator = str[0][1]
+	re, _ := regexp.Compile(`(?s:数据三	: (.*?)\s+\|\s+(.*?)\n)`)
+	text := re.FindAllStringSubmatch(res.(string), -1)
+	var address, operator string
+	if len(text) > 0 {
+		address = text[0][1]
+		operator = text[0][2]
 	}
 
 	return NetworkIp{
