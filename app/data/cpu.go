@@ -25,12 +25,19 @@ func GetCpuInfo() Cpu {
 		return c
 	}
 	c.str = str
-	c.getCpuName()
+
 	c.getCpuCores()
 	c.getCpuProcessor()
 	c.getCpuMinMhz()
 	c.getCpuMaxMhz()
 	c.getCpuTemperature()
+
+	c.str, err = utils.Command("cat /proc/cpuinfo | grep 'model name' | uniq")
+	if err != nil {
+		return c
+	}
+
+	c.getCpuName()
 
 	c.str, err = utils.Command("cat /proc/cpuinfo | grep 'cpu MHz'")
 	if err != nil {
@@ -43,10 +50,9 @@ func GetCpuInfo() Cpu {
 
 // GetCpuName 获取Cpu名称
 func (c *Cpu) getCpuName() {
-	re, _ := regexp.Compile(`(?s:型号名称：.*?(.*?)\n)`)
-	text := re.FindAllStringSubmatch(c.str, -1)
-	if len(text) > 0 {
-		c.CpuName = strings.Trim(text[0][1], " ")
+	s := strings.Split(c.str, ":")
+	if len(s) > 0 {
+		c.CpuName = strings.Trim(s[1], " ")
 	}
 }
 
@@ -86,6 +92,8 @@ func (c *Cpu) getCpuMinMhz() {
 	text := re.FindAllStringSubmatch(c.str, -1)
 	if len(text) > 0 {
 		c.CpuMinMhz = strings.Trim(text[0][1], " ")
+	} else {
+		c.CpuMinMhz = "0"
 	}
 }
 
@@ -95,6 +103,8 @@ func (c *Cpu) getCpuMaxMhz() {
 	text := re.FindAllStringSubmatch(c.str, -1)
 	if len(text) > 0 {
 		c.CpuMaxMhz = strings.Trim(text[0][1], " ")
+	} else {
+		c.CpuMaxMhz = "0"
 	}
 }
 
@@ -111,5 +121,4 @@ func (c *Cpu) getCpuTemperature() {
 	if len(text) > 0 {
 		c.CpuTemperature = text[0][1]
 	}
-
 }
