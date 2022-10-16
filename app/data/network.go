@@ -1,6 +1,7 @@
 package data
 
 import (
+	"dashboard/config"
 	"dashboard/utils"
 	"fmt"
 	"os/exec"
@@ -120,8 +121,8 @@ func (ip *LocalhostIp) getFlow(info *LocalhostIp, str string) {
 		}
 	}
 
-	info.RecvSpeed = utils.FormatFileSize(recv - downBit)
-	info.SendSpeed = utils.FormatFileSize(send - upBit)
+	info.RecvSpeed = utils.FormatFileSize((recv - downBit) / float64(config.App.Rate))
+	info.SendSpeed = utils.FormatFileSize((send - upBit) / float64(config.App.Rate))
 
 	info.Recv = utils.FormatFileSize(recv)
 	info.Send = utils.FormatFileSize(send)
