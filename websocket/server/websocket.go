@@ -17,6 +17,7 @@ type Client struct {
 	route   map[string]func(*Client, []byte)  // 路由列表
 	Force   bool                              // 是否强制下线
 	onUse   func(client *Client, msg *[]byte) // 消息中间件/过滤器
+	Status  bool // 客户端连接状态
 	Rpc     string
 	Udp     string
 	Group   string
@@ -68,7 +69,7 @@ func (c *Client) onSend() {
 
 // Send 发送消息
 func (c *Client) Send(msg []byte) error {
-	if c.Coon != nil && c.msgChan != nil {
+	if c.Coon != nil && c.Status {
 		c.msgChan <- msg
 		return nil
 	} else {

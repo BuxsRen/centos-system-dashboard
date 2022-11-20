@@ -11,23 +11,23 @@ import (
 
 type Dashboard struct{}
 
-// WebSocket 服务
-var WebSocket *server.WebSocket
+// Socket 服务
+var Socket *server.WebSocket
 
 var _ server.WebSocketInterface = (*Dashboard)(nil)
 
 func init() {
-	WebSocket = server.New("ws_"+utils.GetRandString(5)+fmt.Sprintf("%v", utils.Rand(1000, 9999)), 32)
+	Socket = server.New("ws_"+utils.GetRandString(5)+fmt.Sprintf("%v", utils.Rand(1000, 9999)), 32)
 }
 
 func Handle(ctx *gin.Context) {
 	ctx.Set("_id", fmt.Sprintf("%v", utils.Rand(1000, 9999)))
-	client, e := WebSocket.Bind(ctx, new(Dashboard))
+	client, e := Socket.Bind(ctx, new(Dashboard))
 	if e != nil {
 		fmt.Println("[ws]", e)
 		return
 	}
-	_ = WebSocket.Start(client)
+	_ = Socket.Start(client)
 }
 
 // Login 客户端登录

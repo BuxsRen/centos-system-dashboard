@@ -140,6 +140,7 @@ func (ws *WebSocket) queClient() {
 
 // 客户端登录
 func (ws *WebSocket) onLogin(c *Client) {
+	c.Status = true
 	oc, ok := ws.GetClient(c.Id)
 	if ok { // 该账号从其他设备登录该网关，挤掉在线客户端
 		ws.ForceLogout(oc)
@@ -157,6 +158,7 @@ func (ws *WebSocket) onLogin(c *Client) {
 
 // 客户端退出
 func (ws *WebSocket) onLogout(c *Client) {
+	c.Status = false
 	if !c.Force { // 非强制登录，正常注销信息
 		ws.clientList.Delete(c.Id)
 	}
@@ -179,6 +181,7 @@ func (ws *WebSocket) ForceLogout(oc *Client) {
 	ws.clientList.Delete(oc.Id) // 从在线客户端列表中移除该客户端
 	b, _ := json.Marshal(Message{Action: "Logout", Content: "您的账号在另一处设备登录了", FromId: oc.Id})
 	_ = oc.Send(b)
+	oc.Status = false
 	time.Sleep(10 * time.Millisecond)
 	if oc.Coon != nil {
 		oc.Force = true
@@ -234,7 +237,7 @@ func (ws *WebSocket) SendGroupAll(group string, msg []byte) error {
 func (ws *WebSocket) SendAll(msg []byte, ignore string) {
 	ws.clientList.Range(func(key, value interface{}) bool {
 		c := value.(*Client)
-		if c.Id != ignore {
+		if c.Id != ignore && c.Status {
 			_ = c.Send(msg)
 		}
 		return true
