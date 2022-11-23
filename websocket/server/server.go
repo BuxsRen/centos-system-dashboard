@@ -118,6 +118,7 @@ func (ws *WebSocket) queClient() {
 			}
 			switch que.mode {
 			case "login":
+			    que.client.Status = true
 				ws.num++
 				// 随机加入一个区域
 				ws.area.ChangeArea(&area.Client{
@@ -129,6 +130,7 @@ func (ws *WebSocket) queClient() {
 				})
 				ws.onLogin(que.client) // 登录到网关
 			case "logout":
+			    que.client.Status = false
 				ws.num--
 				ws.area.ExitArea(&area.Client{Id: que.client.Id, Name: ws.deviceNumber, Group: que.client.Group}) // 退出区域
 				ws.onLogout(que.client)                                                                           // 退出网关
@@ -140,7 +142,6 @@ func (ws *WebSocket) queClient() {
 
 // 客户端登录
 func (ws *WebSocket) onLogin(c *Client) {
-	c.Status = true
 	oc, ok := ws.GetClient(c.Id)
 	if ok { // 该账号从其他设备登录该网关，挤掉在线客户端
 		ws.ForceLogout(oc)
@@ -158,7 +159,6 @@ func (ws *WebSocket) onLogin(c *Client) {
 
 // 客户端退出
 func (ws *WebSocket) onLogout(c *Client) {
-	c.Status = false
 	if !c.Force { // 非强制登录，正常注销信息
 		ws.clientList.Delete(c.Id)
 	}
@@ -237,7 +237,7 @@ func (ws *WebSocket) SendGroupAll(group string, msg []byte) error {
 func (ws *WebSocket) SendAll(msg []byte, ignore string) {
 	ws.clientList.Range(func(key, value interface{}) bool {
 		c := value.(*Client)
-		if c.Id != ignore && c.Status {
+		if c.Id != ignore && c.msgChan != nil {
 			_ = c.Send(msg)
 		}
 		return true
