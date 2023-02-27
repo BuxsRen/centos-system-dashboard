@@ -6,10 +6,10 @@ import (
 
 // Push 数据推送
 func Push(msg []byte) {
-	web.Socket.SendAll(msg, "")
+	web.WebSocket.SendAll(msg, "")
 }
 
 // IsMonitor 开始监控
 func IsMonitor() bool {
-	return web.Socket != nil && web.Socket.GetClientNum() > 0
+	return web.WebSocket != nil && web.WebSocket.GetClientNum() > 0
 }

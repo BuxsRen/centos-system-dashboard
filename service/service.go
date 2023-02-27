@@ -10,7 +10,7 @@ import (
 
 // Run 启动服务
 func Run() {
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 	server := gin.New()
 	_ = server.SetTrustedProxies(nil)
 	server.Use(handle) // 异常处理

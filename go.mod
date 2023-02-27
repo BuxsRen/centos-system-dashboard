@@ -3,10 +3,9 @@ module dashboard
 go 1.18
 
 require (
-	github.com/Anlandme/sysinfo v0.0.0-20180503014557-36daa56461f1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gorilla/websocket v1.5.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

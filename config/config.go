@@ -16,7 +16,7 @@ func init() {
 	App = loadConfig()
 }
 
-// Service 服务配置
+// 服务配置
 type Service struct {
 	Host string `yaml:"host"` // 服务监听地址
 	Port string `yaml:"port"` // 服务监听端口

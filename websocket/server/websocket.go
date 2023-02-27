@@ -69,7 +69,7 @@ func (c *Client) onSend() {
 
 // Send 发送消息
 func (c *Client) Send(msg []byte) error {
-	if c.Coon != nil && c.Status {
+	if c.Coon != nil && c.Status && c.msgChan != nil {
 		c.msgChan <- msg
 		return nil
 	} else {

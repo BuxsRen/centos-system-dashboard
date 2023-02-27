@@ -1,5 +1,5 @@
 service:
   host: 0.0.0.0
-  port: 8888
+  port: 9191
   rate: 3 # 刷新速率 3s
-  cmd: false # 指令是否可用
+  cmd: true # 指令是否可用

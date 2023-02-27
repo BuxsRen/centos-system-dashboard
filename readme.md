@@ -34,7 +34,7 @@ go build -o dashboard main.go
 nohup ./dashboard &
 ```
 
-http://127.0.0.1:8888/static
+http://127.0.0.1:9191/static
 
 ### 常见问题
 

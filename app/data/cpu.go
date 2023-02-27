@@ -50,7 +50,7 @@ func GetCpuInfo() Cpu {
 
 // GetCpuName 获取Cpu名称
 func (c *Cpu) getCpuName() {
-	s := strings.Split(c.str, ":")
+    s := strings.Split(c.str,":")
 	if len(s) > 0 {
 		c.CpuName = strings.Trim(s[1], " ")
 	}
@@ -121,4 +121,5 @@ func (c *Cpu) getCpuTemperature() {
 	if len(text) > 0 {
 		c.CpuTemperature = text[0][1]
 	}
+
 }

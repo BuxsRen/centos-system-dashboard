@@ -168,7 +168,7 @@ func (ws *WebSocket) onLogout(c *Client) {
 	c.Coon = nil
 	go func(c *Client) {
 		time.Sleep(1 * time.Second)
-		if c.msgChan != nil {
+		if c.msgChan != nil && c.Coon != nil && c.Status {
 			close(c.msgChan)
 			c.msgChan = nil
 		}

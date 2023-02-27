@@ -29,7 +29,7 @@ func NewCurl(url, method, data string) *net {
 	return &n
 }
 
-// SetRequestUrl 设置请求地址
+// 设置请求地址
 /**
  * @param scheme string 协议 http/https
  * @param host string 域名
@@ -43,7 +43,7 @@ func (this *net) SetRequestUrl(scheme, host string) *net {
 	return this
 }
 
-// SetHeader 设置请求头
+// 设置请求头
 /**
  * @param key string 键
  * @param val string 值
@@ -58,7 +58,7 @@ func (this *net) SetHeader(key, val string) *net {
 	return this
 }
 
-// SetMethod 设置请求方式.GET/POST 等
+// 设置请求方式.GET/POST 等
 func (this *net) SetMethod(method string) *net {
 	if this.req != nil {
 		this.req.Method = method
@@ -66,7 +66,7 @@ func (this *net) SetMethod(method string) *net {
 	return this
 }
 
-// SetReturnToMap 设置返回数据是否json转map
+// 设置返回数据是否json转map
 func (this *net) SetReturnToMap(is bool) *net {
 	if this.req != nil {
 		this.returnToMap = is
@@ -74,7 +74,7 @@ func (this *net) SetReturnToMap(is bool) *net {
 	return this
 }
 
-// Do 发送请求，并返回请求数据
+// 发送请求，并返回请求数据
 func (this *net) Do() (interface{}, error) {
 	if this.req == nil {
 		return nil, errors.New("请先初始化:")

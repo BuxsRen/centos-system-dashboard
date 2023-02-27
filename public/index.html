@@ -4,7 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Centos 系统监控面板</title>
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">-->
+    <link rel="stylesheet" href="/static/css/element.css">
     <style>
         .box-card{
             margin: 5px 0;
@@ -14,7 +15,7 @@
 
 <body>
 
-<div id="app">
+<div id="app"  style="margin:0 auto;max-width: 480px">
     <div style="margin:2px;">
         <el-card class="box-card">
             <i v-if="status" style="color:#5cb87a;" class="el-icon-caret-right"></i>
@@ -149,8 +150,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.7.10"></script>
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/vue@2.7.10"></script>-->
+<!--<script src="https://unpkg.com/element-ui/lib/index.js"></script>-->
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/element.js"></script>
 <script>
 
     var vm = new Vue({
@@ -269,11 +272,11 @@
                 let cpu_mhz = []
                 for (index in res.cpu_mhz) {
                     let mhz = (res.cpu_mhz[index]-res.cpu_min_mhz)/(res.cpu_max_mhz-res.cpu_min_mhz)*100
-                    cpu_mhz.push(Math.round(mhz))
+                    cpu_mhz.push(Math.round(mhz/res.cpu_processor))
                     cpu_mhz_sum += mhz
                 }
                 this.cpu_mhz = cpu_mhz
-                this.cpu = Math.round(cpu_mhz_sum/res.cpu_cores)
+                this.cpu = Math.round(cpu_mhz_sum/res.cpu_cores/res.cpu_processor)
 
                 this.net_ip = res.ip
                 this.net_address = res.address
